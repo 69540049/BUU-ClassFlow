@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUU ClassFlow V4.0 | Student Timetable</title>
+<style>
+:root{--navy:#102a56;--blue:#2563eb;--sky:#eaf2ff;--ink:#17243b;--muted:#718096;--line:#e5eaf2;--bg:#f5f7fb;--white:#fff;--green:#0f9d72;--orange:#ed9b32;--red:#e45b68}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Kanit,"Noto Sans Thai",Tahoma,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,#102a56,#1d58a7);color:white;padding:25px max(22px,calc((100% - 1320px)/2));display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;gap:13px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:#ffffff20;display:grid;place-items:center;font-size:23px}.brand h1{font-size:22px;margin:0}.brand p{margin:2px 0 0;color:#c8dcff;font-size:12px}
+.header-actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;cursor:pointer;background:var(--blue);color:white}.btn.light{background:#ffffff18;border:1px solid #ffffff50}.btn.outline{background:white;color:var(--blue);border:1px solid #cbd8ef}.btn.danger{background:#fff0f1;color:#c53b4a}
+main{max-width:1320px;margin:24px auto;padding:0 22px}.notice{background:#fff8e9;border:1px solid #f2dfb6;color:#76551d;padding:12px 15px;border-radius:12px;font-size:13px;margin-bottom:18px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.term{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.term strong{font-size:15px}.select,input{font:inherit;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:white;color:var(--ink);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{background:white;border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:0 4px 16px #19345b08}.stat .label{font-size:12px;color:var(--muted)}.stat .num{font-size:27px;font-weight:700;margin-top:4px}.stat .sub{font-size:11px;color:var(--muted)}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 16px #19345b08;margin-bottom:18px;overflow:hidden}.panel-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.panel-head h2{font-size:16px;margin:0}.panel-head p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.week-wrap{overflow-x:auto}.week{width:100%;min-width:820px;border-collapse:collapse;table-layout:fixed}.week th{background:#f8faff;color:#66758b;font-size:12px;font-weight:600;padding:12px 7px;border-bottom:1px solid var(--line)}.week th:first-child{width:78px}.week td{height:104px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:6px}.week td:first-child{background:#fafbfd;text-align:center;color:#7b8798;font-size:11px;padding-top:12px}.class-card{height:100%;min-height:88px;border-radius:9px;padding:8px;background:#eaf2ff;border-left:3px solid #3678e8;cursor:pointer;overflow:hidden}.class-card:hover{filter:brightness(.98);transform:translateY(-1px)}.class-card .code{font-size:10px;font-weight:700;color:#1d56a6}.class-card .name{font-size:12px;font-weight:600;line-height:1.35;margin:4px 0}.class-card .meta{font-size:10px;color:#536783;line-height:1.45}
+.daylist{display:none;padding:12px}.day-item{border-left:3px solid var(--blue);padding:10px 12px;background:#f5f8ff;border-radius:8px;margin-bottom:9px}
+.table-wrap{overflow-x:auto}table.list{width:100%;border-collapse:collapse;min-width:700px}table.list th,table.list td{text-align:left;padding:12px 15px;border-bottom:1px solid var(--line);font-size:12px}table.list th{color:#718096;background:#fafbfd;font-weight:600}table.list tr:last-child td{border-bottom:0}.tag{background:#edf3ff;color:#2457a6;padding:4px 8px;border-radius:20px;font-size:10px}
+.empty{text-align:center;padding:35px;color:var(--muted);font-size:13px}
+footer{text-align:center;color:#8793a5;font-size:11px;padding:8px 0 28px}
+.modal-back{display:none;position:fixed;inset:0;background:#0b183a80;z-index:5;align-items:center;justify-content:center;padding:16px}.modal{background:white;width:min(620px,100%);max-height:92vh;overflow:auto;border-radius:17px;padding:21px;box-shadow:0 20px 60px #09152b40}.modal h2{margin:0 0 16px;font-size:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#64748b}.field input,.field select{width:100%}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media(max-width:800px){.calendar-cell{min-height:52px;padding:4px;font-size:10px}.stats{grid-template-columns:repeat(2,1fr)}main{padding:0 13px;margin:16px auto}.stats{grid-template-columns:repeat(2,1fr)}header{padding:20px 16px}.week-wrap{display:none}.daylist{display:block}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+@media print{header{background:#fff;color:#111;padding:10px 0}.header-actions,.toolbar .btn,.notice{display:none!important}main{margin:0;padding:0}.panel,.stat{box-shadow:none}.week-wrap{display:block}.week{min-width:0}.daylist{display:none}body{background:white}}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.calendar-cell{min-height:68px;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:11px;background:#fff;cursor:pointer;text-align:left}.calendar-cell.head{min-height:0;border:0;background:#f8faff;color:var(--muted);text-align:center;font-weight:600;cursor:default}.calendar-cell.today{border-color:var(--blue);background:#f0f6ff}.calendar-cell .dot{display:inline-block;width:6px;height:6px;background:var(--orange);border-radius:50%;margin-left:3px}.calendar-cell.selected{background:#eaf2ff;border-color:#2563eb}.calendar-detail{margin-top:12px;padding:12px;border-radius:10px;background:#f8faff;font-size:12px}
+.file-row,.task-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;margin:8px 0;background:#fff;flex-wrap:wrap}
+.file-icon{width:36px;height:36px;display:grid;place-items:center;background:#edf3ff;border-radius:9px;font-size:18px}
+.file-info,.task-info{flex:1;min-width:180px}.file-info b,.task-info b{font-size:12px}.file-info small,.task-info small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.status-select{font:inherit;font-size:11px;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.priority{font-size:10px;border-radius:20px;padding:4px 8px;background:#fff1e5;color:#a65c13}.priority.low{background:#edf8f3;color:#16845f}.priority.high{background:#fff0f1;color:#c53b4a}
+.task-done{opacity:.62}.task-done .task-info b{text-decoration:line-through}
+.small-action{border:0;background:#f1f4f9;color:#52627a;border-radius:7px;padding:7px 9px;cursor:pointer;font:inherit;font-size:11px}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">🎓</div><div><h1>BUU ClassFlow V4.0</h1><p>STUDENT TIMETABLE DASHBOARD · BURAPHA UNIVERSITY</p></div></div>
+ <div class="header-actions"><button class="btn light" onclick="document.getElementById('importFile').click()">นำเข้าข้อมูล</button><button class="btn light" onclick="exportData()">ส่งออก JSON</button><button class="btn light" onclick="window.print()">พิมพ์ตาราง</button><button class="btn" onclick="openForm()">＋ เพิ่มรายวิชา</button><input id="importFile" type="file" accept=".json,.csv" hidden onchange="importData(event)"></div>
+</header>
+<main>
+ <div class="notice">หมายเหตุ: ขณะนี้ยังไม่สามารถดึงข้อมูลจากระบบทะเบียน BUU โดยตรงได้ ตารางนี้จึงเริ่มต้นเป็น Dashboard เปล่า สามารถเพิ่มรายวิชาเองหรือนำเข้าไฟล์ข้อมูลได้ ข้อมูลจะบันทึกไว้ในอุปกรณ์นี้</div>
+ <div class="toolbar"><div class="term"><strong>ตารางเรียนของฉัน</strong><select id="semester" class="select"><option>ภาคเรียนที่ 1</option><option>ภาคเรียนที่ 2</option><option>ภาคฤดูร้อน</option></select><select id="year" class="select"><option>ปีการศึกษา 2569</option><option>ปีการศึกษา 2570</option><option>ปีการศึกษา 2568</option></select></div><div><input id="search" placeholder="ค้นหารหัส / ชื่อวิชา..." oninput="render()"></div></div>
+ <section class="stats">
+  <div class="stat"><div class="label">รายวิชาทั้งหมด</div><div class="num" id="count">0</div><div class="sub">วิชาที่ลงทะเบียน</div></div>
+  <div class="stat"><div class="label">หน่วยกิตรวม</div><div class="num" id="credits">0</div><div class="sub">หน่วยกิต</div></div>
+  <div class="stat"><div class="label">ชั่วโมงเรียน / สัปดาห์</div><div class="num" id="hours">0</div><div class="sub">ชั่วโมงโดยประมาณ</div></div>
+  <div class="stat"><div class="label">วันที่มีเรียน</div><div class="num" id="days">0</div><div class="sub">วันต่อสัปดาห์</div></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Weekly Schedule</h2><p>ภาพรวมตารางเรียนรายสัปดาห์ · แตะการ์ดรายวิชาเพื่อแก้ไข</p></div><span class="tag" id="classCount">0 รายการ</span></div>
+  <div class="week-wrap"><table class="week"><thead><tr><th>เวลา</th><th>จันทร์</th><th>อังคาร</th><th>พุธ</th><th>พฤหัสบดี</th><th>ศุกร์</th><th>เสาร์</th><th>อาทิตย์</th></tr></thead><tbody id="weekBody"></tbody></table></div>
+  <div class="daylist" id="mobileDays"></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Course Directory</h2><p>รายละเอียดรายวิชา ห้องเรียน และผู้สอน</p></div><button class="btn outline" onclick="downloadCSV()">ดาวน์โหลด CSV</button></div>
+  <div class="table-wrap"><table class="list"><thead><tr><th>รหัสวิชา</th><th>ชื่อรายวิชา</th><th>หน่วยกิต</th><th>วัน / เวลา</th><th>ห้องเรียน</th><th>อาจารย์ผู้สอน</th><th></th></tr></thead><tbody id="courseRows"></tbody></table></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Learning Intelligence</h2><p>ติดตามความคืบหน้า Deadline และผลการเรียน</p></div><button class="btn outline" onclick="requestDeadlineNotifications()">เปิดแจ้งเตือน Deadline</button></div>
+  <div class="stats" style="padding:15px 18px;margin:0">
+   <div class="stat"><div class="label">งานที่ต้องส่ง</div><div class="num" id="pendingTasks">0</div><div class="sub">ยังไม่เสร็จ</div></div>
+   <div class="stat"><div class="label">งานใกล้ครบกำหนด</div><div class="num" id="urgentTasks">0</div><div class="sub">ภายใน 7 วัน</div></div>
+   <div class="stat"><div class="label">ความคืบหน้างาน</div><div class="num" id="taskProgress">0%</div><div class="sub">งานที่เสร็จแล้ว</div></div>
+   <div class="stat"><div class="label">เกรดเฉลี่ยที่บันทึก</div><div class="num" id="gpaValue">—</div><div class="sub">คำนวณจากรายวิชาที่กรอกคะแนน</div></div>
+  </div>
+  <div style="padding:0 18px 18px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px"><span>Overall Assignment Progress</span><b id="progressLabel">0 / 0 งาน</b></div><div style="height:9px;border-radius:20px;background:#edf1f7;overflow:hidden"><div id="progressBar" style="height:100%;width:0;background:linear-gradient(90deg,#2563eb,#0f9d72);border-radius:20px"></div></div></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Deadline Calendar</h2><p>ปฏิทินกำหนดส่งงานและกิจกรรมการเรียน</p></div><div style="display:flex;gap:7px;align-items:center"><button class="small-action" onclick="changeMonth(-1)">‹</button><b id="calendarMonth" style="font-size:12px"></b><button class="small-action" onclick="changeMonth(1)">›</button></div></div>
+  <div id="deadlineCalendar" style="padding:12px"></div>
+  <div style="padding:0 18px 14px;font-size:10px;color:var(--muted)">● วันมีกำหนดส่งงาน · เลือกวันที่เพื่อดูรายการงาน</div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Grade Tracker</h2><p>บันทึกคะแนนและประเมินผลรายวิชา</p></div><button class="btn" onclick="openGradeForm()">＋ เพิ่มคะแนน</button></div>
+  <div class="table-wrap"><table class="list"><thead><tr><th>รายวิชา</th><th>คะแนนที่ได้</th><th>คะแนนเต็ม</th><th>เปอร์เซ็นต์</th><th>เกรดประมาณการ</th><th></th></tr></thead><tbody id="gradeRows"></tbody></table></div>
+  <div style="padding:12px 16px;color:var(--muted);font-size:10px">เกรดเป็นการประเมินเบื้องต้นตามเกณฑ์ทั่วไป สามารถแก้ไขเกณฑ์ให้ตรงกับรายวิชาจริงได้</div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Cloud Integration · V4.0</h2><p>เชื่อมต่อพื้นที่จัดเก็บไฟล์และปฏิทินการเรียน</p></div><span class="tag">Google Workspace</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;padding:18px">
+   <div style="border:1px solid var(--line);border-radius:13px;padding:15px">
+    <div style="font-size:25px">📁</div><b style="font-size:14px">Google Drive · Study Files</b>
+    <p style="font-size:11px;color:var(--muted);line-height:1.6">เปิดโฟลเดอร์ BUU ที่กำหนดเพื่ออัปโหลดและจัดเก็บเอกสารเรียน ใช้ลิงก์ไฟล์จาก Drive แนบไว้ในรายการไฟล์เรียนได้</p>
+    <button class="btn" style="width:100%" onclick="window.open('https://drive.google.com/drive/folders/1y9LSRXRU5-1pjzVtwEQVo6UPNnWiv1ad?usp=drive_link','_blank','noopener')">เปิด BUU Study Drive ↗</button>
+    <div style="font-size:10px;color:#9a6b21;margin-top:8px">การอัปโหลดทำผ่าน Google Drive โดยตรง ยังไม่มีการซิงก์ API อัตโนมัติ</div>
+   </div>
+   <div style="border:1px solid var(--line);border-radius:13px;padding:15px">
+    <div style="font-size:25px">📅</div><b style="font-size:14px">Google Calendar</b>
+    <p style="font-size:11px;color:var(--muted);line-height:1.6">ส่งออกกำหนดส่งงานและตารางเรียนเป็นไฟล์ปฏิทิน .ics เพื่อนำเข้า Google Calendar</p>
+    <button class="btn" style="width:100%" onclick="exportCalendarICS()">ส่งออกปฏิทิน .ics</button>
+    <button class="btn outline" style="width:100%;margin-top:7px" onclick="window.open('https://calendar.google.com/calendar/u/0/r?pli=1','_blank','noopener')">เปิด Google Calendar ↗</button>
+    <div style="font-size:10px;color:#16845f;margin-top:8px">รองรับการนำเข้าไฟล์ปฏิทินด้วยตนเอง</div>
+   </div>
+  </div>
+  <div style="margin:0 18px 18px;padding:12px;background:#fff8e9;border:1px solid #f2dfb6;border-radius:10px;color:#76551d;font-size:11px;line-height:1.6">
+   <b>สถานะการเชื่อมต่อ:</b> V4.0 นี้เชื่อมผ่านลิงก์โฟลเดอร์และส่งออกปฏิทิน ไม่ใช่การซิงก์สองทางแบบเรียลไทม์ การเชื่อม Google Drive API โดยตรงยังต้องตั้งค่า OAuth 2.0 และสิทธิ์ API ของเจ้าของบัญชี/โฟลเดอร์
+  </div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Study Workspace</h2><p>พื้นที่จัดการไฟล์เรียนและงานประจำสัปดาห์</p></div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)">
+   <button class="btn" id="tabFiles" onclick="showWorkspace('files')">📁 ไฟล์เรียนรายสัปดาห์</button>
+   <button class="btn outline" id="tabTasks" onclick="showWorkspace('tasks')">✓ งานประจำสัปดาห์</button>
+  </div>
+  <div id="workspaceFiles" style="padding:18px">
+   <div class="formgrid">
+    <div class="field"><label>เลือกรายวิชา</label><select id="fileCourse"></select></div>
+    <div class="field"><label>สัปดาห์ที่</label><input id="fileWeek" type="week"></div>
+    <div class="field full"><label>เลือกไฟล์เอกสาร / สไลด์ / ใบงาน</label><input id="studyFile" type="file" multiple></div>
+    <div class="field full"><label>คำอธิบายไฟล์ (ไม่บังคับ)</label><input id="fileNote" placeholder="เช่น Lecture 03, ใบงานบทที่ 2"></div>
+   </div>
+   <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="uploadStudyFiles()">＋ อัปโหลดไฟล์</button></div>
+   <div style="margin-top:20px"><div style="font-weight:600;font-size:13px;margin-bottom:8px">ไฟล์ที่บันทึกไว้</div><div id="studyFileList"></div></div>
+  </div>
+  <div id="workspaceTasks" style="padding:18px;display:none">
+   <div class="formgrid">
+    <div class="field full"><label>ชื่องาน / สิ่งที่ต้องทำ *</label><input id="taskTitle" placeholder="เช่น ทำแบบฝึกหัดบทที่ 3" /></div>
+    <div class="field"><label>รายวิชา</label><select id="taskCourse"></select></div>
+    <div class="field"><label>สัปดาห์ที่</label><input id="taskWeek" type="week"></div>
+    <div class="field"><label>กำหนดส่ง</label><input id="taskDue" type="date"></div>
+    <div class="field"><label>ความสำคัญ</label><select id="taskPriority"><option value="สูง">สูง</option><option value="ปานกลาง" selected>ปานกลาง</option><option value="ต่ำ">ต่ำ</option></select></div>
+   </div>
+   <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="addWeeklyTask()">＋ เพิ่มงาน</button></div>
+   <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:20px 0 10px"><b style="font-size:13px">รายการงาน</b><select id="taskFilterWeek" onchange="renderTasks()" style="margin-left:auto"><option value="">ทุกสัปดาห์</option></select><select id="taskFilterStatus" onchange="renderTasks()"><option value="">ทุกสถานะ</option><option>ยังไม่เริ่ม</option><option>กำลังทำ</option><option>เสร็จแล้ว</option></select></div>
+   <div id="weeklyTaskList"></div>
+  </div>
+ </section>
+ <footer>BUU ClassFlow · Personal Study Planner · ข้อมูลจัดเก็บใน Browser ของผู้ใช้</footer>
+</main>
+<div class="modal-back" id="gradeModal"><div class="modal"><h2 id="gradeFormTitle">เพิ่มคะแนนรายวิชา</h2><form onsubmit="saveGrade(event)"><div class="formgrid">
+ <div class="field full"><label>รายวิชา *</label><select id="gradeCourse" required></select></div>
+ <div class="field"><label>คะแนนที่ได้ *</label><input id="gradeScore" type="number" min="0" step="0.01" required></div>
+ <div class="field"><label>คะแนนเต็ม *</label><input id="gradeMax" type="number" min="0.01" step="0.01" value="100" required></div>
+ </div><div class="modal-actions"><button type="button" class="btn outline" onclick="closeGradeForm()">ยกเลิก</button><button class="btn">บันทึกคะแนน</button></div></form></div></div>
+<div class="modal-back" id="modal"><div class="modal"><h2 id="formTitle">เพิ่มรายวิชา</h2><form id="courseForm" onsubmit="saveCourse(event)"><input type="hidden" id="editId"><div class="formgrid">
+ <div class="field"><label>รหัสวิชา *</label><input id="code" required placeholder="เช่น 426xxxxx"></div>
+ <div class="field"><label>ชื่อรายวิชา *</label><input id="name" required placeholder="ชื่อรายวิชา"></div>
+ <div class="field"><label>วันเรียน *</label><select id="day"><option value="1">จันทร์</option><option value="2">อังคาร</option><option value="3">พุธ</option><option value="4">พฤหัสบดี</option><option value="5">ศุกร์</option><option value="6">เสาร์</option><option value="0">อาทิตย์</option></select></div>
+ <div class="field"><label>หน่วยกิต</label><input id="credit" type="number" min="0" step="0.5" value="3"></div>
+ <div class="field"><label>เวลาเริ่ม *</label><input id="start" type="time" required value="09:00"></div>
+ <div class="field"><label>เวลาสิ้นสุด *</label><input id="end" type="time" required value="12:00"></div>
+ <div class="field"><label>ห้องเรียน</label><input id="room" placeholder="เช่น KB- ชั้น 3"></div>
+ <div class="field"><label>อาจารย์ผู้สอน</label><input id="teacher" placeholder="ชื่ออาจารย์"></div>
+ <div class="field full"><label>หมายเหตุ</label><input id="note" placeholder="เช่น เรียนออนไลน์ / กลุ่มเรียน"></div>
+ </div><div class="modal-actions"><button type="button" class="btn outline" onclick="closeForm()">ยกเลิก</button><button class="btn" type="submit">บันทึกข้อมูล</button></div></form></div></div>
+<script>
+const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const hours=Array.from({length:14},(_,i)=>i+7);
+let courses=JSON.parse(localStorage.getItem('buuClassFlow')||'[]');
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem('buuClassFlow',JSON.stringify(courses));render();if(typeof initWorkspace==='function')initWorkspace();if(typeof refreshV3==='function')refreshV3()}
+function mins(t){let [h,m]=t.split(':').map(Number);return h*60+m}
+function render(){
+ const q=$('search').value.toLowerCase();
+ const data=courses.filter(c=>(c.code+c.name+c.room+c.teacher).toLowerCase().includes(q));
+ $('count').textContent=courses.length;$('credits').textContent=courses.reduce((s,c)=>s+(+c.credit||0),0);
+ $('hours').textContent=courses.reduce((s,c)=>s+(mins(c.end)-mins(c.start))/60,0).toFixed(1).replace('.0','');
+ $('days').textContent=new Set(courses.map(c=>c.day)).size;$('classCount').textContent=data.length+' รายการ';
+ let body='';
+ hours.forEach(h=>{body+=`<tr><td>${String(h).padStart(2,'0')}:00</td>`;for(let d=1;d<=6;d++){let c=data.filter(x=>+x.day===d&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${c.map(x=>`<div class="class-card" onclick="editCourse('${x.id}')"><div class="code">${esc(x.code)}</div><div class="name">${esc(x.name)}</div><div class="meta">${x.start}–${x.end}<br>${esc(x.room||'ไม่ระบุห้อง')}</div></div>`).join('')}</td>`}body+='</tr>'});
+ // Sunday column appended separately by rebuilding with 7 days
+ body='';hours.forEach(h=>{body+=`<tr><td>${String(h).padStart(2,'0')}:00</td>`;for(let d=1;d<=6;d++){let c=data.filter(x=>+x.day===d&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${c.map(x=>card(x)).join('')}</td>`}let su=data.filter(x=>+x.day===0&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${su.map(x=>card(x)).join('')}</td></tr>`});
+ $('weekBody').innerHTML=body;
+ $('mobileDays').innerHTML=days.map((n,d)=>{let arr=data.filter(c=>+c.day===d).sort((a,b)=>a.start.localeCompare(b.start));return arr.length?`<div style="margin-bottom:14px"><b style="font-size:13px">${n}</b>${arr.map(c=>`<div class="day-item" onclick="editCourse('${c.id}')"><b>${esc(c.code)} · ${esc(c.name)}</b><div style="font-size:11px;color:#64748b">${c.start}–${c.end} · ${esc(c.room||'ไม่ระบุห้อง')} · ${esc(c.teacher||'')}</div></div>`).join('')}</div>`:''}).join('')||'<div class="empty">ยังไม่มีข้อมูลตารางเรียน</div>';
+ $('courseRows').innerHTML=data.length?data.map(c=>`<tr><td><b>${esc(c.code)}</b></td><td>${esc(c.name)}</td><td>${c.credit||0}</td><td>${days[+c.day]} ${c.start}–${c.end}</td><td>${esc(c.room||'-')}</td><td>${esc(c.teacher||'-')}</td><td><button class="btn outline" onclick="editCourse('${c.id}')">แก้ไข</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">ยังไม่มีรายวิชา — กด “เพิ่มรายวิชา” เพื่อเริ่มต้น</td></tr>';
+}
+function card(x){return `<div class="class-card" onclick="editCourse('${x.id}')"><div class="code">${esc(x.code)}</div><div class="name">${esc(x.name)}</div><div class="meta">${x.start}–${x.end}<br>${esc(x.room||'ไม่ระบุห้อง')}</div></div>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openForm(){ $('courseForm').reset();$('editId').value='';$('formTitle').textContent='เพิ่มรายวิชา';$('modal').style.display='flex'}
+function closeForm(){$('modal').style.display='none'}
+function editCourse(id){let c=courses.find(x=>x.id===id);if(!c)return;openForm();$('formTitle').textContent='แก้ไขรายวิชา';Object.keys(c).forEach(k=>{let el=$(k);if(el)el.value=c[k]});$('editId').value=id}
+function saveCourse(e){e.preventDefault();let id=$('editId').value||String(Date.now());let c={id,code:$('code').value.trim(),name:$('name').value.trim(),day:$('day').value,credit:$('credit').value,start:$('start').value,end:$('end').value,room:$('room').value.trim(),teacher:$('teacher').value.trim(),note:$('note').value.trim()};if(mins(c.end)<=mins(c.start)){alert('เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม');return}let idx=courses.findIndex(x=>x.id===id);if(idx>=0)courses[idx]=c;else courses.push(c);closeForm();persist()}
+function exportData(){let backup={courses,studyFiles,weeklyTasks,grades};let blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});download(blob,'buu-classflow-v4-backup.json')}
+function downloadCSV(){let rows=[['code','name','day','credit','start','end','room','teacher','note'],...courses.map(c=>[c.code,c.name,days[+c.day],c.credit,c.start,c.end,c.room,c.teacher,c.note])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');download(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'buu-timetable.csv')}
+function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let parsed;if(f.name.endsWith('.json'))parsed=JSON.parse(r.result);else{let lines=r.result.replace(/^\ufeff/,'').trim().split(/\r?\n/);let head=lines.shift().split(',').map(x=>x.replace(/^"|"$/g,''));parsed=lines.map((line,i)=>{let vals=line.match(/("(?:[^"]|"")*"|[^,]*)(,|$)/g).map(x=>x.replace(/,$/,'').replace(/^"|"$/g,'').replace(/""/g,'"'));let o={};head.forEach((h,j)=>o[h]=vals[j]);let d=days.indexOf(o.day);o.day=d<0?o.day:d;return {...o,id:o.id||String(Date.now()+i)}})}if(Array.isArray(parsed)){courses=parsed.map((c,i)=>({...c,id:c.id||String(Date.now()+i)}))}else if(parsed&&Array.isArray(parsed.courses)){courses=parsed.courses;weeklyTasks=parsed.weeklyTasks||[];grades=parsed.grades||[];studyFiles=parsed.studyFiles||[];localStorage.setItem('buuWeeklyTasks',JSON.stringify(weeklyTasks));localStorage.setItem('buuGrades',JSON.stringify(grades));localStorage.setItem('buuStudyFiles',JSON.stringify(studyFiles))}else throw Error();persist();alert('นำเข้าข้อมูลเรียบร้อย')}catch(err){alert('รูปแบบไฟล์ไม่ถูกต้อง กรุณาใช้ JSON ที่ส่งออกจากระบบ หรือ CSV ตามหัวคอลัมน์ที่กำหนด')}e.target.value=''};r.readAsText(f,'UTF-8')}
+render();
+
+// Study Workspace: weekly files and weekly assignments
+let studyFiles = JSON.parse(localStorage.getItem('buuStudyFiles') || '[]');
+let weeklyTasks = JSON.parse(localStorage.getItem('buuWeeklyTasks') || '[]');
+const DB_NAME='BUUClassFlowFiles', STORE='attachments';
+function openFileDB(){return new Promise((resolve,reject)=>{let req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(STORE,{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function saveBinary(id,file){let db=await openFileDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({id,blob:file});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function getBinary(id){let db=await openFileDB();return new Promise((resolve,reject)=>{let req=db.transaction(STORE).objectStore(STORE).get(id);req.onsuccess=()=>resolve(req.result?.blob);req.onerror=()=>reject(req.error)})}
+async function deleteBinary(id){let db=await openFileDB();return new Promise(resolve=>{let tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=resolve})}
+function isoWeekNow(){let d=new Date();let date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));let year=date.getUTCFullYear();let start=new Date(Date.UTC(year,0,1));let week=Math.ceil((((date-start)/86400000)+1)/7);return `${year}-W${String(week).padStart(2,'0')}`}
+function courseOptions(){let opts=courses.map(c=>`<option value="${esc(c.id)}">${esc(c.code)} · ${esc(c.name)}</option>`).join('');return '<option value="">ไม่ระบุรายวิชา</option>'+opts}
+function initWorkspace(){
+ ['fileCourse','taskCourse'].forEach(id=>$(id).innerHTML=courseOptions());
+ ['fileWeek','taskWeek'].forEach(id=>$(id).value=isoWeekNow());
+ $('taskFilterWeek').innerHTML='<option value="">ทุกสัปดาห์</option>'+[...new Set(weeklyTasks.map(t=>t.week).filter(Boolean))].sort().reverse().map(w=>`<option>${esc(w)}</option>`).join('');
+ renderStudyFiles();renderTasks();
+}
+function showWorkspace(which){
+ let files=which==='files';$('workspaceFiles').style.display=files?'block':'none';$('workspaceTasks').style.display=files?'none':'block';
+ $('tabFiles').className=files?'btn':'btn outline';$('tabTasks').className=files?'btn outline':'btn';
+}
+async function uploadStudyFiles(){
+ let selected=[...$('studyFile').files];if(!selected.length){alert('กรุณาเลือกไฟล์ก่อนอัปโหลด');return}
+ let course=courses.find(c=>c.id===$('fileCourse').value);
+ for(let file of selected){
+  let id='f'+Date.now()+Math.random().toString(16).slice(2);
+  try{await saveBinary(id,file);studyFiles.push({id,name:file.name,size:file.size,type:file.type,courseId:course?.id||'',courseName:course?course.code+' · '+course.name:'ไม่ระบุรายวิชา',week:$('fileWeek').value,note:$('fileNote').value,created:new Date().toISOString()})}
+  catch(e){alert('ไม่สามารถจัดเก็บไฟล์ได้ อาจเป็นเพราะพื้นที่จัดเก็บของ Browser ไม่เพียงพอ');break}
+ }
+ localStorage.setItem('buuStudyFiles',JSON.stringify(studyFiles));$('studyFile').value='';$('fileNote').value='';renderStudyFiles();
+}
+function fmtSize(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB'}
+function renderStudyFiles(){
+ let list=studyFiles.slice().sort((a,b)=>(b.created||'').localeCompare(a.created||''));
+ $('studyFileList').innerHTML=list.length?list.map(f=>`<div class="file-row"><div class="file-icon">📄</div><div class="file-info"><b>${esc(f.name)}</b><small>${esc(f.courseName)} · ${esc(f.week||'ไม่ระบุสัปดาห์')} · ${fmtSize(f.size)}${f.note?' · '+esc(f.note):''}</small></div><button class="small-action" onclick="downloadStudyFile('${f.id}')">ดาวน์โหลด</button><button class="small-action" onclick="removeStudyFile('${f.id}')">ลบ</button></div>`).join(''):'<div class="empty">ยังไม่มีไฟล์เรียน อัปโหลดเอกสารแยกตามรายวิชาและสัปดาห์ได้ที่นี่</div>';
+}
+async function downloadStudyFile(id){let f=studyFiles.find(x=>x.id===id);if(!f)return;let blob=await getBinary(id);if(!blob){alert('ไม่พบไฟล์ในพื้นที่จัดเก็บของ Browser');return}let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function removeStudyFile(id){if(!confirm('ต้องการลบไฟล์นี้ใช่หรือไม่?'))return;await deleteBinary(id);studyFiles=studyFiles.filter(f=>f.id!==id);localStorage.setItem('buuStudyFiles',JSON.stringify(studyFiles));renderStudyFiles()}
+function addWeeklyTask(){
+ let title=$('taskTitle').value.trim();if(!title){alert('กรุณากรอกชื่องาน');return}
+ let c=courses.find(x=>x.id===$('taskCourse').value);
+ weeklyTasks.push({id:'t'+Date.now(),title,courseId:c?.id||'',courseName:c?c.code+' · '+c.name:'ไม่ระบุรายวิชา',week:$('taskWeek').value,due:$('taskDue').value,priority:$('taskPriority').value,status:'ยังไม่เริ่ม',created:new Date().toISOString()});
+ localStorage.setItem('buuWeeklyTasks',JSON.stringify(weeklyTasks));$('taskTitle').value='';$('taskDue').value='';initWorkspace();
+}
+function renderTasks(){
+ let week=$('taskFilterWeek').value,status=$('taskFilterStatus').value;
+ let rows=weeklyTasks.filter(t=>(!week||t.week===week)&&(!status||t.status===status)).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+ $('weeklyTaskList').innerHTML=rows.length?rows.map(t=>`<div class="task-row ${t.status==='เสร็จแล้ว'?'task-done':''}"><div class="task-info"><b>${esc(t.title)}</b><small>${esc(t.courseName)} · ${esc(t.week||'ไม่ระบุสัปดาห์')} · กำหนดส่ง ${esc(t.due||'ไม่กำหนด')}</small></div><span class="priority ${t.priority==='สูง'?'high':t.priority==='ต่ำ'?'low':''}">${esc(t.priority)}</span><select class="status-select" onchange="updateTaskStatus('${t.id}',this.value)"><option ${t.status==='ยังไม่เริ่ม'?'selected':''}>ยังไม่เริ่ม</option><option ${t.status==='กำลังทำ'?'selected':''}>กำลังทำ</option><option ${t.status==='เสร็จแล้ว'?'selected':''}>เสร็จแล้ว</option></select><button class="small-action" onclick="deleteTask('${t.id}')">ลบ</button></div>`).join(''):'<div class="empty">ไม่มีงานในเงื่อนไขที่เลือก · เพิ่มงานใหม่ได้ด้านบน</div>';
+}
+function updateTaskStatus(id,status){let t=weeklyTasks.find(x=>x.id===id);if(t){t.status=status;localStorage.setItem('buuWeeklyTasks',JSON.stringify(weeklyTasks));renderTasks();if(typeof refreshV3==='function')refreshV3()}}
+function deleteTask(id){if(!confirm('ต้องการลบงานนี้ใช่หรือไม่?'))return;weeklyTasks=weeklyTasks.filter(t=>t.id!==id);localStorage.setItem('buuWeeklyTasks',JSON.stringify(weeklyTasks));initWorkspace();if(typeof refreshV3==='function')refreshV3()}
+
+initWorkspace();
+
+// V3: deadline calendar, reminders, assignment analytics and grade tracker
+let grades=JSON.parse(localStorage.getItem('buuGrades')||'[]');
+let calendarCursor=new Date();calendarCursor.setDate(1);
+let selectedCalendarDate='';
+function refreshV3(){
+ const total=weeklyTasks.length,done=weeklyTasks.filter(t=>t.status==='เสร็จแล้ว').length;
+ const today=new Date();today.setHours(0,0,0,0);
+ const soon=weeklyTasks.filter(t=>t.status!=='เสร็จแล้ว'&&t.due).filter(t=>{let d=new Date(t.due+'T00:00:00');let diff=(d-today)/86400000;return diff>=0&&diff<=7}).length;
+ $('pendingTasks').textContent=total-done;$('urgentTasks').textContent=soon;
+ $('taskProgress').textContent=total?Math.round(done/total*100)+'%':'0%';
+ $('progressLabel').textContent=`${done} / ${total} งาน`;$('progressBar').style.width=(total?done/total*100:0)+'%';
+ const weighted=grades.reduce((s,g)=>s+(+g.score),0),max=grades.reduce((s,g)=>s+(+g.max),0);
+ $('gpaValue').textContent=max?(weighted/max*4).toFixed(2):'—';
+ $('gradeCourse').innerHTML=courses.map(c=>`<option value="${esc(c.id)}">${esc(c.code)} · ${esc(c.name)}</option>`).join('')||'<option value="">เพิ่มรายวิชาก่อน</option>';
+ renderGrades();renderCalendar();
+}
+function gradeLetter(p){return p>=80?'A':p>=75?'B+':p>=70?'B':p>=65?'C+':p>=60?'C':p>=55?'D+':p>=50?'D':'F'}
+function renderGrades(){
+ $('gradeRows').innerHTML=grades.length?grades.map(g=>{let c=courses.find(x=>x.id===g.courseId);let pct=(+g.score/+g.max*100);return `<tr><td>${esc(c?c.code+' · '+c.name:g.courseName||'ไม่ระบุรายวิชา')}</td><td>${g.score}</td><td>${g.max}</td><td>${pct.toFixed(1)}%</td><td><span class="tag">${gradeLetter(pct)}</span></td><td><button class="small-action" onclick="deleteGrade('${g.id}')">ลบ</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">ยังไม่มีคะแนนที่บันทึก</td></tr>';
+}
+function openGradeForm(){if(!courses.length){alert('กรุณาเพิ่มรายวิชาในตารางเรียนก่อน');return}$('gradeModal').style.display='flex'}
+function closeGradeForm(){$('gradeModal').style.display='none'}
+function saveGrade(e){e.preventDefault();let c=courses.find(x=>x.id===$('gradeCourse').value);let score=+$('gradeScore').value,max=+$('gradeMax').value;if(!c||max<=0||score<0||score>max){alert('กรุณาตรวจสอบรายวิชาและคะแนน');return}grades=grades.filter(g=>g.courseId!==c.id);grades.push({id:'g'+Date.now(),courseId:c.id,courseName:c.name,score,max});localStorage.setItem('buuGrades',JSON.stringify(grades));closeGradeForm();refreshV3()}
+function deleteGrade(id){if(!confirm('ลบข้อมูลคะแนนนี้ใช่หรือไม่?'))return;grades=grades.filter(g=>g.id!==id);localStorage.setItem('buuGrades',JSON.stringify(grades));refreshV3()}
+function changeMonth(n){calendarCursor.setMonth(calendarCursor.getMonth()+n);renderCalendar()}
+function dateKey(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function renderCalendar(){
+ const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+ $('calendarMonth').textContent=new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(calendarCursor);
+ const first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate();
+ let cells=['อา','จ','อ','พ','พฤ','ศ','ส'].map(x=>`<div class="calendar-cell head">${x}</div>`).join('');
+ for(let i=0;i<first;i++)cells+='<div class="calendar-cell" style="visibility:hidden"></div>';
+ for(let d=1;d<=count;d++){let key=dateKey(y,m,d),items=weeklyTasks.filter(t=>t.due===key&&t.status!=='เสร็จแล้ว');let today=new Date(),isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;cells+=`<button class="calendar-cell ${isToday?'today':''} ${selectedCalendarDate===key?'selected':''}" onclick="selectCalendarDate('${key}')">${d}${items.length?'<span class="dot"></span>':''}<div style="font-size:9px;color:#7b8798;margin-top:5px">${items.length?items.length+' งาน':''}</div></button>`}
+ $('deadlineCalendar').innerHTML=`<div class="calendar-grid">${cells}</div>`+(selectedCalendarDate?calendarDetail(selectedCalendarDate):'');
+}
+function calendarDetail(key){let items=weeklyTasks.filter(t=>t.due===key);return `<div class="calendar-detail"><b>${new Date(key+'T00:00:00').toLocaleDateString('th-TH',{dateStyle:'full'})}</b>${items.length?items.map(t=>`<div style="padding-top:8px">${esc(t.title)} · ${esc(t.courseName)} <span class="tag">${esc(t.status)}</span></div>`).join(''):'<div style="padding-top:8px;color:#718096">ไม่มีงานกำหนดส่งในวันนี้</div>'}</div>`}
+function selectCalendarDate(key){selectedCalendarDate=key;renderCalendar()}
+function requestDeadlineNotifications(){
+ if(!('Notification'in window)){alert('Browser นี้ไม่รองรับการแจ้งเตือน');return}
+ Notification.requestPermission().then(p=>{if(p==='granted'){alert('เปิดการแจ้งเตือนแล้ว ขณะเปิดหน้า Dashboard ระบบจะแจ้งเตือนงานที่ครบกำหนดวันนี้');notifyDueTasks()}else alert('ยังไม่ได้รับอนุญาตให้แจ้งเตือน')})
+}
+function notifyDueTasks(){if(!('Notification'in window)||Notification.permission!=='granted')return;let today=new Date().toISOString().slice(0,10);weeklyTasks.filter(t=>t.due===today&&t.status!=='เสร็จแล้ว').forEach(t=>new Notification('BUU ClassFlow · งานครบกำหนดวันนี้',{body:t.title+' — '+t.courseName}))}
+
+refreshV3();notifyDueTasks();
+
+// V4: Export assignments and next class sessions to an iCalendar file.
+function icsEscape(value){return String(value||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n')}
+function toICSDate(date){return date.getFullYear()+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0')}
+function toICSTime(date){return toICSDate(date)+'T'+String(date.getHours()).padStart(2,'0')+String(date.getMinutes()).padStart(2,'0')+'00'}
+function nextWeekday(day){
+ let d=new Date();d.setHours(0,0,0,0);let delta=(Number(day)-d.getDay()+7)%7;if(delta===0)delta=7;d.setDate(d.getDate()+delta);return d;
+}
+function exportCalendarICS(){
+ let lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//BUU ClassFlow//V4.0//TH','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:BUU ClassFlow'];
+ weeklyTasks.filter(t=>t.due).forEach(t=>{
+  let start=t.due.replace(/-/g,'');
+  lines.push('BEGIN:VEVENT','UID:'+icsEscape(t.id)+'@buu-classflow','DTSTAMP:'+toICSTime(new Date())+'Z','DTSTART;VALUE=DATE:'+start,'SUMMARY:'+icsEscape('ส่งงาน: '+t.title),'DESCRIPTION:'+icsEscape((t.courseName||'')+' | สถานะ: '+(t.status||'ยังไม่เริ่ม')+' | ความสำคัญ: '+(t.priority||'ปานกลาง')),'END:VEVENT');
+ });
+ courses.forEach(c=>{
+  let d=nextWeekday(c.day),[sh,sm]=c.start.split(':').map(Number),[eh,em]=c.end.split(':').map(Number);
+  let start=new Date(d);start.setHours(sh,sm,0,0);let end=new Date(d);end.setHours(eh,em,0,0);
+  lines.push('BEGIN:VEVENT','UID:class-'+icsEscape(c.id)+'@buu-classflow','DTSTAMP:'+toICSTime(new Date())+'Z','DTSTART:'+toICSTime(start),'DTEND:'+toICSTime(end),'SUMMARY:'+icsEscape('เรียน '+c.code+' '+c.name),'DESCRIPTION:'+icsEscape('ห้อง: '+(c.room||'ไม่ระบุ')+' | อาจารย์: '+(c.teacher||'ไม่ระบุ')),'LOCATION:'+icsEscape(c.room||''),'END:VEVENT');
+ });
+ lines.push('END:VCALENDAR');
+ let blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+ let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BUU-ClassFlow-Calendar.ics';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+
+</script>
+</body></html>
