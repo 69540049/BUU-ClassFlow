@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUU ClassFlow | Student Timetable</title>
+<style>
+:root{--navy:#102a56;--blue:#2563eb;--sky:#eaf2ff;--ink:#17243b;--muted:#718096;--line:#e5eaf2;--bg:#f5f7fb;--white:#fff;--green:#0f9d72;--orange:#ed9b32;--red:#e45b68}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Kanit,"Noto Sans Thai",Tahoma,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,#102a56,#1d58a7);color:white;padding:25px max(22px,calc((100% - 1320px)/2));display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;gap:13px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:#ffffff20;display:grid;place-items:center;font-size:23px}.brand h1{font-size:22px;margin:0}.brand p{margin:2px 0 0;color:#c8dcff;font-size:12px}
+.header-actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;cursor:pointer;background:var(--blue);color:white}.btn.light{background:#ffffff18;border:1px solid #ffffff50}.btn.outline{background:white;color:var(--blue);border:1px solid #cbd8ef}.btn.danger{background:#fff0f1;color:#c53b4a}
+main{max-width:1320px;margin:24px auto;padding:0 22px}.notice{background:#fff8e9;border:1px solid #f2dfb6;color:#76551d;padding:12px 15px;border-radius:12px;font-size:13px;margin-bottom:18px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.term{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.term strong{font-size:15px}.select,input{font:inherit;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:white;color:var(--ink);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{background:white;border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:0 4px 16px #19345b08}.stat .label{font-size:12px;color:var(--muted)}.stat .num{font-size:27px;font-weight:700;margin-top:4px}.stat .sub{font-size:11px;color:var(--muted)}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 16px #19345b08;margin-bottom:18px;overflow:hidden}.panel-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.panel-head h2{font-size:16px;margin:0}.panel-head p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.week-wrap{overflow-x:auto}.week{width:100%;min-width:820px;border-collapse:collapse;table-layout:fixed}.week th{background:#f8faff;color:#66758b;font-size:12px;font-weight:600;padding:12px 7px;border-bottom:1px solid var(--line)}.week th:first-child{width:78px}.week td{height:104px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:6px}.week td:first-child{background:#fafbfd;text-align:center;color:#7b8798;font-size:11px;padding-top:12px}.class-card{height:100%;min-height:88px;border-radius:9px;padding:8px;background:#eaf2ff;border-left:3px solid #3678e8;cursor:pointer;overflow:hidden}.class-card:hover{filter:brightness(.98);transform:translateY(-1px)}.class-card .code{font-size:10px;font-weight:700;color:#1d56a6}.class-card .name{font-size:12px;font-weight:600;line-height:1.35;margin:4px 0}.class-card .meta{font-size:10px;color:#536783;line-height:1.45}
+.daylist{display:none;padding:12px}.day-item{border-left:3px solid var(--blue);padding:10px 12px;background:#f5f8ff;border-radius:8px;margin-bottom:9px}
+.table-wrap{overflow-x:auto}table.list{width:100%;border-collapse:collapse;min-width:700px}table.list th,table.list td{text-align:left;padding:12px 15px;border-bottom:1px solid var(--line);font-size:12px}table.list th{color:#718096;background:#fafbfd;font-weight:600}table.list tr:last-child td{border-bottom:0}.tag{background:#edf3ff;color:#2457a6;padding:4px 8px;border-radius:20px;font-size:10px}
+.empty{text-align:center;padding:35px;color:var(--muted);font-size:13px}
+footer{text-align:center;color:#8793a5;font-size:11px;padding:8px 0 28px}
+.modal-back{display:none;position:fixed;inset:0;background:#0b183a80;z-index:5;align-items:center;justify-content:center;padding:16px}.modal{background:white;width:min(620px,100%);max-height:92vh;overflow:auto;border-radius:17px;padding:21px;box-shadow:0 20px 60px #09152b40}.modal h2{margin:0 0 16px;font-size:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#64748b}.field input,.field select{width:100%}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media(max-width:800px){main{padding:0 13px;margin:16px auto}.stats{grid-template-columns:repeat(2,1fr)}header{padding:20px 16px}.week-wrap{display:none}.daylist{display:block}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+@media print{header{background:#fff;color:#111;padding:10px 0}.header-actions,.toolbar .btn,.notice{display:none!important}main{margin:0;padding:0}.panel,.stat{box-shadow:none}.week-wrap{display:block}.week{min-width:0}.daylist{display:none}body{background:white}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">🎓</div><div><h1>BUU ClassFlow</h1><p>STUDENT TIMETABLE DASHBOARD · BURAPHA UNIVERSITY</p></div></div>
+ <div class="header-actions"><button class="btn light" onclick="document.getElementById('importFile').click()">นำเข้าข้อมูล</button><button class="btn light" onclick="exportData()">ส่งออก JSON</button><button class="btn light" onclick="window.print()">พิมพ์ตาราง</button><button class="btn" onclick="openForm()">＋ เพิ่มรายวิชา</button><input id="importFile" type="file" accept=".json,.csv" hidden onchange="importData(event)"></div>
+</header>
+<main>
+ <div class="notice">หมายเหตุ: ขณะนี้ยังไม่สามารถดึงข้อมูลจากระบบทะเบียน BUU โดยตรงได้ ตารางนี้จึงเริ่มต้นเป็น Dashboard เปล่า สามารถเพิ่มรายวิชาเองหรือนำเข้าไฟล์ข้อมูลได้ ข้อมูลจะบันทึกไว้ในอุปกรณ์นี้</div>
+ <div class="toolbar"><div class="term"><strong>ตารางเรียนของฉัน</strong><select id="semester" class="select"><option>ภาคเรียนที่ 1</option><option>ภาคเรียนที่ 2</option><option>ภาคฤดูร้อน</option></select><select id="year" class="select"><option>ปีการศึกษา 2569</option><option>ปีการศึกษา 2570</option><option>ปีการศึกษา 2568</option></select></div><div><input id="search" placeholder="ค้นหารหัส / ชื่อวิชา..." oninput="render()"></div></div>
+ <section class="stats">
+  <div class="stat"><div class="label">รายวิชาทั้งหมด</div><div class="num" id="count">0</div><div class="sub">วิชาที่ลงทะเบียน</div></div>
+  <div class="stat"><div class="label">หน่วยกิตรวม</div><div class="num" id="credits">0</div><div class="sub">หน่วยกิต</div></div>
+  <div class="stat"><div class="label">ชั่วโมงเรียน / สัปดาห์</div><div class="num" id="hours">0</div><div class="sub">ชั่วโมงโดยประมาณ</div></div>
+  <div class="stat"><div class="label">วันที่มีเรียน</div><div class="num" id="days">0</div><div class="sub">วันต่อสัปดาห์</div></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Weekly Schedule</h2><p>ภาพรวมตารางเรียนรายสัปดาห์ · แตะการ์ดรายวิชาเพื่อแก้ไข</p></div><span class="tag" id="classCount">0 รายการ</span></div>
+  <div class="week-wrap"><table class="week"><thead><tr><th>เวลา</th><th>จันทร์</th><th>อังคาร</th><th>พุธ</th><th>พฤหัสบดี</th><th>ศุกร์</th><th>เสาร์</th><th>อาทิตย์</th></tr></thead><tbody id="weekBody"></tbody></table></div>
+  <div class="daylist" id="mobileDays"></div>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><div><h2>Course Directory</h2><p>รายละเอียดรายวิชา ห้องเรียน และผู้สอน</p></div><button class="btn outline" onclick="downloadCSV()">ดาวน์โหลด CSV</button></div>
+  <div class="table-wrap"><table class="list"><thead><tr><th>รหัสวิชา</th><th>ชื่อรายวิชา</th><th>หน่วยกิต</th><th>วัน / เวลา</th><th>ห้องเรียน</th><th>อาจารย์ผู้สอน</th><th></th></tr></thead><tbody id="courseRows"></tbody></table></div>
+ </section>
+ <footer>BUU ClassFlow · Personal Study Planner · ข้อมูลจัดเก็บใน Browser ของผู้ใช้</footer>
+</main>
+<div class="modal-back" id="modal"><div class="modal"><h2 id="formTitle">เพิ่มรายวิชา</h2><form id="courseForm" onsubmit="saveCourse(event)"><input type="hidden" id="editId"><div class="formgrid">
+ <div class="field"><label>รหัสวิชา *</label><input id="code" required placeholder="เช่น 426xxxxx"></div>
+ <div class="field"><label>ชื่อรายวิชา *</label><input id="name" required placeholder="ชื่อรายวิชา"></div>
+ <div class="field"><label>วันเรียน *</label><select id="day"><option value="1">จันทร์</option><option value="2">อังคาร</option><option value="3">พุธ</option><option value="4">พฤหัสบดี</option><option value="5">ศุกร์</option><option value="6">เสาร์</option><option value="0">อาทิตย์</option></select></div>
+ <div class="field"><label>หน่วยกิต</label><input id="credit" type="number" min="0" step="0.5" value="3"></div>
+ <div class="field"><label>เวลาเริ่ม *</label><input id="start" type="time" required value="09:00"></div>
+ <div class="field"><label>เวลาสิ้นสุด *</label><input id="end" type="time" required value="12:00"></div>
+ <div class="field"><label>ห้องเรียน</label><input id="room" placeholder="เช่น KB- ชั้น 3"></div>
+ <div class="field"><label>อาจารย์ผู้สอน</label><input id="teacher" placeholder="ชื่ออาจารย์"></div>
+ <div class="field full"><label>หมายเหตุ</label><input id="note" placeholder="เช่น เรียนออนไลน์ / กลุ่มเรียน"></div>
+ </div><div class="modal-actions"><button type="button" class="btn outline" onclick="closeForm()">ยกเลิก</button><button class="btn" type="submit">บันทึกข้อมูล</button></div></form></div></div>
+<script>
+const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const hours=Array.from({length:14},(_,i)=>i+7);
+let courses=JSON.parse(localStorage.getItem('buuClassFlow')||'[]');
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem('buuClassFlow',JSON.stringify(courses));render()}
+function mins(t){let [h,m]=t.split(':').map(Number);return h*60+m}
+function render(){
+ const q=$('search').value.toLowerCase();
+ const data=courses.filter(c=>(c.code+c.name+c.room+c.teacher).toLowerCase().includes(q));
+ $('count').textContent=courses.length;$('credits').textContent=courses.reduce((s,c)=>s+(+c.credit||0),0);
+ $('hours').textContent=courses.reduce((s,c)=>s+(mins(c.end)-mins(c.start))/60,0).toFixed(1).replace('.0','');
+ $('days').textContent=new Set(courses.map(c=>c.day)).size;$('classCount').textContent=data.length+' รายการ';
+ let body='';
+ hours.forEach(h=>{body+=`<tr><td>${String(h).padStart(2,'0')}:00</td>`;for(let d=1;d<=6;d++){let c=data.filter(x=>+x.day===d&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${c.map(x=>`<div class="class-card" onclick="editCourse('${x.id}')"><div class="code">${esc(x.code)}</div><div class="name">${esc(x.name)}</div><div class="meta">${x.start}–${x.end}<br>${esc(x.room||'ไม่ระบุห้อง')}</div></div>`).join('')}</td>`}body+='</tr>'});
+ // Sunday column appended separately by rebuilding with 7 days
+ body='';hours.forEach(h=>{body+=`<tr><td>${String(h).padStart(2,'0')}:00</td>`;for(let d=1;d<=6;d++){let c=data.filter(x=>+x.day===d&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${c.map(x=>card(x)).join('')}</td>`}let su=data.filter(x=>+x.day===0&&mins(x.start)<(h+1)*60&&mins(x.end)>h*60);body+=`<td>${su.map(x=>card(x)).join('')}</td></tr>`});
+ $('weekBody').innerHTML=body;
+ $('mobileDays').innerHTML=days.map((n,d)=>{let arr=data.filter(c=>+c.day===d).sort((a,b)=>a.start.localeCompare(b.start));return arr.length?`<div style="margin-bottom:14px"><b style="font-size:13px">${n}</b>${arr.map(c=>`<div class="day-item" onclick="editCourse('${c.id}')"><b>${esc(c.code)} · ${esc(c.name)}</b><div style="font-size:11px;color:#64748b">${c.start}–${c.end} · ${esc(c.room||'ไม่ระบุห้อง')} · ${esc(c.teacher||'')}</div></div>`).join('')}</div>`:''}).join('')||'<div class="empty">ยังไม่มีข้อมูลตารางเรียน</div>';
+ $('courseRows').innerHTML=data.length?data.map(c=>`<tr><td><b>${esc(c.code)}</b></td><td>${esc(c.name)}</td><td>${c.credit||0}</td><td>${days[+c.day]} ${c.start}–${c.end}</td><td>${esc(c.room||'-')}</td><td>${esc(c.teacher||'-')}</td><td><button class="btn outline" onclick="editCourse('${c.id}')">แก้ไข</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">ยังไม่มีรายวิชา — กด “เพิ่มรายวิชา” เพื่อเริ่มต้น</td></tr>';
+}
+function card(x){return `<div class="class-card" onclick="editCourse('${x.id}')"><div class="code">${esc(x.code)}</div><div class="name">${esc(x.name)}</div><div class="meta">${x.start}–${x.end}<br>${esc(x.room||'ไม่ระบุห้อง')}</div></div>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openForm(){ $('courseForm').reset();$('editId').value='';$('formTitle').textContent='เพิ่มรายวิชา';$('modal').style.display='flex'}
+function closeForm(){$('modal').style.display='none'}
+function editCourse(id){let c=courses.find(x=>x.id===id);if(!c)return;openForm();$('formTitle').textContent='แก้ไขรายวิชา';Object.keys(c).forEach(k=>{let el=$(k);if(el)el.value=c[k]});$('editId').value=id}
+function saveCourse(e){e.preventDefault();let id=$('editId').value||String(Date.now());let c={id,code:$('code').value.trim(),name:$('name').value.trim(),day:$('day').value,credit:$('credit').value,start:$('start').value,end:$('end').value,room:$('room').value.trim(),teacher:$('teacher').value.trim(),note:$('note').value.trim()};if(mins(c.end)<=mins(c.start)){alert('เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม');return}let idx=courses.findIndex(x=>x.id===id);if(idx>=0)courses[idx]=c;else courses.push(c);closeForm();persist()}
+function exportData(){let blob=new Blob([JSON.stringify(courses,null,2)],{type:'application/json'});download(blob,'buu-timetable.json')}
+function downloadCSV(){let rows=[['code','name','day','credit','start','end','room','teacher','note'],...courses.map(c=>[c.code,c.name,days[+c.day],c.credit,c.start,c.end,c.room,c.teacher,c.note])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');download(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'buu-timetable.csv')}
+function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let parsed;if(f.name.endsWith('.json'))parsed=JSON.parse(r.result);else{let lines=r.result.replace(/^\ufeff/,'').trim().split(/\r?\n/);let head=lines.shift().split(',').map(x=>x.replace(/^"|"$/g,''));parsed=lines.map((line,i)=>{let vals=line.match(/("(?:[^"]|"")*"|[^,]*)(,|$)/g).map(x=>x.replace(/,$/,'').replace(/^"|"$/g,'').replace(/""/g,'"'));let o={};head.forEach((h,j)=>o[h]=vals[j]);let d=days.indexOf(o.day);o.day=d<0?o.day:d;return {...o,id:o.id||String(Date.now()+i)}})}if(!Array.isArray(parsed))throw Error();courses=parsed.map((c,i)=>({...c,id:c.id||String(Date.now()+i)}));persist();alert('นำเข้าข้อมูลเรียบร้อย')}catch(err){alert('รูปแบบไฟล์ไม่ถูกต้อง กรุณาใช้ JSON ที่ส่งออกจากระบบ หรือ CSV ตามหัวคอลัมน์ที่กำหนด')}e.target.value=''};r.readAsText(f,'UTF-8')}
+render();
+</script>
+</body></html>
